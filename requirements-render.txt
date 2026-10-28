@@ -1,0 +1,13 @@
+# Packages for the free Render test site. Smaller than requirements.txt on
+# purpose: the camera page runs in the browser, and the pieces that need
+# OpenCV, the C2PA signer, or the object-fingerprint package are skipped
+# here so a free build can finish. The site still opens without them.
+streamlit>=1.42
+pandas>=2.0
+altair>=5
+Pillow>=10
+fastapi>=0.110
+uvicorn[standard]>=0.29
+httpx>=0.27
+bagit>=1.8
+openpyxl>=3.1

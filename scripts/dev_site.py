@@ -58,6 +58,26 @@ def _redirect(app_name):
     return view
 
 
+def _admin_off():
+    """The admin console is a write surface. On a public test URL it stays off."""
+    body = (
+        "<!doctype html><meta charset=utf-8><title>Admin is off on this test site</title>"
+        "<p>The admin console is not running on this test site. "
+        "On a public link it would be open to anyone.</p>"
+        "<p><a href=\"/\">Back to the homepage</a></p>"
+    ).encode()
+
+    async def app(scope, receive, send):
+        if scope["type"] != "http":
+            return
+        await send({"type": "http.response.start", "status": 200,
+                    "headers": [(b"content-type", b"text/html; charset=utf-8"),
+                                (b"content-length", str(len(body)).encode())]})
+        await send({"type": "http.response.body", "body": body, "more_body": False})
+
+    return app
+
+
 routes = [Mount("/api", app=api_app)]
 routes += [Route(path, _file(name)) for path, name in FILES.items()]
 for sub in ("fingerprint-web", "barcoding", "shop-diagrams", "pwa", "img", "splat"):
@@ -66,9 +86,17 @@ for sub in ("fingerprint-web", "barcoding", "shop-diagrams", "pwa", "img", "spla
         routes.append(Mount(mount, app=StaticFiles(directory=DEPLOY / sub)))
 if (DEPLOY / "blog").exists():   # html=True: /blog/ serves index.html like the proxy does
     routes.append(Mount("/blog", app=StaticFiles(directory=DEPLOY / "blog", html=True)))
-for name in STREAMLIT:
-    routes.append(Route(f"/{name}/", _redirect(name)))
-    routes.append(Route(f"/{name}/{{tail:path}}", _redirect(name)))
+# On a laptop, send the browser to the Streamlit port. On Render
+# (GLASSDB_PROXY_APPS=1) the visitor cannot reach that port, so forward it.
+if os.environ.get("GLASSDB_PROXY_APPS") == "1":
+    from scripts.local_proxy import streamlit_proxy  # noqa: E402
+    routes.append(Mount("/explore", app=streamlit_proxy(STREAMLIT["explore"], "/explore")))
+    routes.append(Mount("/glowtbook", app=streamlit_proxy(STREAMLIT["glowtbook"], "/glowtbook")))
+    routes.append(Mount("/admin", app=_admin_off()))
+else:
+    for name in STREAMLIT:
+        routes.append(Route(f"/{name}/", _redirect(name)))
+        routes.append(Route(f"/{name}/{{tail:path}}", _redirect(name)))
 routes.append(Route("/{page}.html", page))
 routes.append(Route("/{page}", page))   # /games -> games.html, like the proxy
 
