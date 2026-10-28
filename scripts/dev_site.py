@@ -20,11 +20,13 @@ sys.path.insert(0, str(ROOT))
 DEPLOY = ROOT / "deploy"
 
 from starlette.applications import Starlette  # noqa: E402
+from starlette.middleware import Middleware  # noqa: E402
 from starlette.responses import FileResponse, PlainTextResponse, RedirectResponse  # noqa: E402
 from starlette.routing import Mount, Route  # noqa: E402
 from starlette.staticfiles import StaticFiles  # noqa: E402
 
 from api.main import app as api_app  # noqa: E402
+from central.security_headers import SecurityHeadersMiddleware  # noqa: E402
 
 STREAMLIT = {"glowtbook": 8503, "explore": 8502, "admin": 8501}
 FILES = {"/": "landing-index.html", "/paper.css": "paper.css", "/splat.html": "splat.html",
@@ -70,7 +72,7 @@ for name in STREAMLIT:
 routes.append(Route("/{page}.html", page))
 routes.append(Route("/{page}", page))   # /games -> games.html, like the proxy
 
-site = Starlette(routes=routes)
+site = Starlette(routes=routes, middleware=[Middleware(SecurityHeadersMiddleware)])
 
 if __name__ == "__main__":
     import uvicorn

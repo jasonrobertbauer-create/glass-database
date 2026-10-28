@@ -179,6 +179,7 @@ def ensure(conn) -> None:
                       ("legend", "TEXT DEFAULT ''")):
         if col not in have:
             conn.execute(f"ALTER TABLE season_entries ADD COLUMN {col} {decl}")
+    _correct_known_titles(conn)
     for ddl in ("CREATE INDEX IF NOT EXISTS ix_sentries_season ON season_entries(season_id, status)",
                 "CREATE INDEX IF NOT EXISTS ix_sentries_artist ON season_entries(artist_uid)",
                 "CREATE INDEX IF NOT EXISTS ix_svotes_entry ON season_votes(entry_id)",
@@ -190,6 +191,24 @@ def ensure(conn) -> None:
                 "CREATE INDEX IF NOT EXISTS ix_sawards_cat ON season_award_votes(category_id, entry_id)"):
         conn.execute(ddl)
     conn.commit()
+
+
+# The live collecting event was saved without "the". Correct that display name
+# wherever it is stored; the slug (and every link that uses it) stays put.
+OFFICIAL_TITLES = {
+    "court of gourds 2026": "Court of the Gourds 2026",
+}
+
+
+def _correct_known_titles(conn) -> None:
+    try:
+        rows = conn.execute("SELECT id, title FROM seasons").fetchall()
+    except Exception:  # noqa: BLE001
+        return
+    for r in rows:
+        fixed = OFFICIAL_TITLES.get((r["title"] or "").strip().lower())
+        if fixed and r["title"] != fixed:
+            conn.execute("UPDATE seasons SET title=? WHERE id=?", (fixed, r["id"]))
 
 
 # --- seasons -------------------------------------------------------------------

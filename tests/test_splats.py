@@ -59,7 +59,8 @@ def test_upload_replace_fetch_delete(client):
     assert client.get(f"/splats/{sid}").status_code == 404
     mine = client.get("/splats/mine", headers=_auth()).json()["splats"]
     assert [s["id"] for s in mine] == [j2["splat"]["id"]]
-    # only the owner can delete
+    # anonymous callers are refused; another signed-in person cannot delete it either
+    assert client.delete(f"/splats/{j2['splat']['id']}").status_code == 401
     assert client.delete(f"/splats/{j2['splat']['id']}", headers=_auth("u2", "u2@example.com")).status_code == 404
     assert client.delete(f"/splats/{j2['splat']['id']}", headers=_auth()).json()["ok"]
     assert client.get(f"/splats/{j2['splat']['id']}").status_code == 404
