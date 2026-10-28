@@ -860,7 +860,7 @@ elif section == "🎃 Collecting Events":
                  "Photo Mat wrote onto the piece; 'solo' limits an award to pieces made solo.")
         _preset_theme = {"Pumpkins": "pumpkin", "Ornaments": "ornament"}.get(_preset, "")
         with st.form("season_create", clear_on_submit=True):
-            s_title = st.text_input("Title", placeholder="Court of the Gourds")
+            s_title = st.text_input("Title", placeholder="Court of the Gourds 2026")
             s_theme = st.text_input("Theme (one line, shown in italics on the page)",
                                     placeholder="Blown-glass pumpkins from every shop")
             s_desc = st.text_area("Description", height=80,
@@ -908,7 +908,7 @@ elif section == "🎃 Collecting Events":
     _all = _seasons.list_seasons(conn, include_draft=True)
     if not _all:
         st.info("No collecting events yet — create the first one above. Suggested calendar: Court of "
-                "the Gourds (Oct), Heirloom Ornaments (Dec), Paperweights (spring), Drinkware (summer).")
+                "the Gourds 2026 (Oct), Heirloom Ornaments (Dec), Paperweights (spring), Drinkware (summer).")
     for s in _all:
         with st.container(border=True):
             c1, c2 = st.columns([3, 2])

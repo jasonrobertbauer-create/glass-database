@@ -46,6 +46,8 @@ def test_multiselect_stored_joined_and_pending(demo_db):
     priv = {r[0] for r in c.execute(
         "SELECT column FROM _columns WHERE tbl='artist_submissions' AND is_public=0")}
     assert "email" in priv and "submitted_by" in priv
+    # demographics are stored, but not published
+    assert {"birth_year", "death_year", "ethnicity", "gender"} <= priv
 
 
 def test_moderate_endpoint_requires_valid_signature(demo_db):

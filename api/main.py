@@ -32,7 +32,9 @@ from fastapi.responses import StreamingResponse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from central import approvals  # noqa: E402
+from central import manifest as M  # noqa: E402
 from central.dbconn import connect  # noqa: E402
+from central.security_headers import SecurityHeadersMiddleware  # noqa: E402
 
 ADMIN_KEY = os.environ.get("GLASSDB_ADMIN_TOKEN", "")
 
@@ -53,12 +55,14 @@ app = FastAPI(
         "Read-only, self-describing access to the Glass Database — studios, "
         "artists, programs, opportunities, events, trade shows and more. "
         "Published under a Creative Commons license. Restricted data and "
-        "personal contact fields are withheld from public responses."
+        "personal contact fields and demographic fields (ethnicity, gender, birth year) "
+        "are withheld from public responses."
     ),
 )
 app.add_middleware(
     CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], allow_headers=["*"],
 )
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Routers for the surfaces that grew beyond read-only: sign-in for the static
 # pages, the signed-in person's own pieces (capture app writes), seasonal games,
@@ -108,7 +112,9 @@ def _columns(conn, table: str, admin: bool):
     out = []
     for r in rows:
         d = dict(r)
-        if admin or d["is_public"]:
+        # is_public is whatever ingest stored. Demographic columns are withheld
+        # from public responses even when an older database still marks them public.
+        if admin or (d["is_public"] and not M.is_private_column(d["column"])):
             out.append(d)
     return out
 

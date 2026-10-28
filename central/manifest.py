@@ -123,6 +123,14 @@ SKIP = {
 PRIVATE_COLUMN_PATTERNS = [
     r"email", r"e_mail", r"phone", r"contact", r"claim_token",
     r"internal_notes", r"street_address", r"^address$", r"^source$",
+    # Personal demographics. Matched as substrings so spreadsheet headers such as
+    # "What's your Ethnicity?" (what_s_your_ethnicity) and
+    # "Birth Year (What year were you born?)" (birth_year_what_year_were_you_born)
+    # are covered, not only the short intake names. "born" alone is not listed:
+    # nationality / base columns mention where someone was born and stay public.
+    r"ethnic", r"gender",
+    r"birth_year", r"year_of_birth", r"date_of_birth", r"(^|_)dob($|_)",
+    r"death_year", r"year_of_death", r"date_of_death",
 ]
 
 # Columns that should be typed REAL (for map/sort) rather than TEXT.

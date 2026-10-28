@@ -27,7 +27,7 @@ under it, small:
 | **Photo Mat** | Capture mat, printed mat, coverage mat | The printed sheet you set the piece on; "Walk around your piece until the bar fills up." | `/fingerprint/capture-mat.pdf` |
 | **Glowtbook — your studio notebook** | Glowtbook | Always with "your studio notebook" beside it the first time on a page | `/glowtbook/` |
 | **Collecting Events** | Seasons, Games, the season | Time-boxed collecting games with awards and a leaderboard | `/games.html` |
-| **Court of the Gourds** | Pumpkin Patch 2026 | This autumn's collecting event (rename the live season's title in Admin) | current season |
+| **Court of the Gourds 2026** | Pumpkin Patch 2026, Court of Gourds 2026 | This autumn's collecting event. The API corrects the saved title "Court of Gourds 2026" (missing "the"); the slug stays `court-of-gourds-2026` / `pumpkin-patch-2026` | current season |
 | **Shows & Sales** | Events, maker-hosted events, ornament days | Where makers sell in person; buyers add what they bought to their collection at the table | `/events.html` |
 | **3D Photo** | Splat, Gaussian splat, 3D view | Turn a piece in your hands on screen; your phone makes it | `/splat.html` |
 | **Studio Cost Calculator** | Shop cost calculator, shop costs | What it costs to run a studio, by the month and by the piece | `/shop-costs.html` |
@@ -66,7 +66,7 @@ Sub-navs (the crumb is the primary item, then its pages):
 - Find Artists & Studios › The Directory (`/explore/`) · Who Worked With Whom (`/graph.html`) ·
   Studios on a map (`/studios.html`) · Jobs, Calls & Classes (`/explore/?view=opportunities`) ·
   For Researchers (`/api/docs`)
-- Collecting Events › Court of the Gourds (`/games.html`) · Shows & Sales (`/events.html`) ·
+- Collecting Events › Court of the Gourds 2026 (`/games.html`) · Shows & Sales (`/events.html`) ·
   Add to My Collection (`/register.html`) · Check a Piece (`/fingerprint/verify.html`)
 - Glass ID › Register Your Piece (`/fingerprint/enroll.html`) · Check a Piece
   (`/fingerprint/verify.html`) · 3D Photo (`/splat.html`) · Photo Mat

@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Blowing Glass in Lima — Glass Database</title>
 <meta name="description" content="Lima is an easy place to melt glass and a hard place to sell it — cheap piped gas, a mining economy that digs up every oxide in a glass batch, and a city of eleven million buying its glass from somewhere else. A hot shop here costs about $380,000 to build and $350,000 a year to run, and the constraint is not energy but demand.">
+<meta property="og:site_name" content="Glass Database">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Blowing Glass in Lima — Glass Database">
+<meta property="og:description" content="Lima is an easy place to melt glass and a hard place to sell it — cheap piped gas, a mining economy that digs up every oxide in a glass batch, and a city of eleven million buying its glass from somewhere else. A hot shop here costs about $380,000 to build and $350,000 a year to run, and the constraint is not energy but demand.">
+<meta property="og:url" content="https://glassdatabase.org/blog/blowing-glass-in-lima.html">
+<meta property="og:image" content="https://glassdatabase.org/img/home/lima.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Blowing Glass in Lima — Glass Database">
+<meta name="twitter:description" content="Lima is an easy place to melt glass and a hard place to sell it — cheap piped gas, a mining economy that digs up every oxide in a glass batch, and a city of eleven million buying its glass from somewhere else. A hot shop here costs about $380,000 to build and $350,000 a year to run, and the constraint is not energy but demand.">
+<meta name="twitter:image" content="https://glassdatabase.org/img/home/lima.jpg">
 <link rel="canonical" href="https://glassdatabase.org/blog/blowing-glass-in-lima.html">
 <link rel="alternate" type="application/rss+xml" title="Glass Database — Field notes" href="/blog/feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,9 +38,11 @@
   .opener .label { line-height: 1.8; }
   .opener .sign { margin-top: 1.2rem; }
   /* post body: prose in the 9/12 column under the title */
-  .body-grid { display: grid; grid-template-columns: 3fr 9fr; gap: 2rem; padding: clamp(2.5rem, 5vw, 4rem) 0; }
+  /* minmax(0, …) so a wide table scrolls inside the article instead of widening the page */
+  .body-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); gap: 2rem; padding: clamp(2.5rem, 5vw, 4rem) 0; min-width: 0; }
+  .body-grid > * { min-width: 0; }
   .body-grid aside { display: flex; flex-direction: column; gap: 1.1rem; align-items: flex-start; align-self: start; position: sticky; top: 90px; }
-  article.post { max-width: 68ch; font-size: 17px; line-height: 1.65; color: var(--ink-2); }
+  article.post { max-width: 68ch; min-width: 0; font-size: 17px; line-height: 1.65; color: var(--ink-2); overflow-wrap: break-word; }
   article.post p { max-width: none; margin: 0 0 1.2em; }
   article.post h2 { font-size: 2.2rem; line-height: 1.1; color: var(--ink); margin: 2.4em 0 .6em; font-variation-settings: "opsz" 72; }
   article.post h2:first-child { margin-top: 0; }
@@ -46,6 +58,7 @@
     font-family: var(--serif); font-weight: 350; font-size: 1.15em; line-height: 1.45; }
   article.post blockquote p { margin: 0; }
   article.post hr { border: 0; height: 1px; background: var(--rule); margin: 2.6em 0; }
+  article.post .tbl { max-width: 100%; overflow-x: auto; }
   article.post .tbl table { min-width: 520px; }
   .post-foot { max-width: 68ch; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--ink); }
   .post-foot .sign { margin-top: 1rem; }
@@ -57,7 +70,7 @@
   .posts.list li a.t { display: block; font: 350 1.5rem/1.15 var(--serif); letter-spacing: -.01em; text-decoration: none; margin-bottom: .4rem; }
   .posts.list li a.t:hover { color: var(--red); }
   .posts.list li p { color: var(--ink-2); font-size: 16px; margin: 0 0 .8rem; }
-  @media (max-width: 980px) { .body-grid { grid-template-columns: 1fr; } .body-grid aside { position: static; flex-direction: row; flex-wrap: wrap; } }
+  @media (max-width: 980px) { .body-grid { grid-template-columns: minmax(0, 1fr); } .body-grid aside { position: static; flex-direction: row; flex-wrap: wrap; } }
   @media (max-width: 680px) { .posts.list li { grid-template-columns: 1fr; gap: .3rem; } }
 </style>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Blowing Glass in Lima", "datePublished": "2026-10-17", "author": {"@type": "Organization", "name": "Glass Database"}, "description": "Lima is an easy place to melt glass and a hard place to sell it — cheap piped gas, a mining economy that digs up every oxide in a glass batch, and a city of eleven million buying its glass from somewhere else. A hot shop here costs about $380,000 to build and $350,000 a year to run, and the constraint is not energy but demand.", "url": "https://glassdatabase.org/blog/blowing-glass-in-lima.html", "license": "https://creativecommons.org/licenses/by/4.0/"}</script>

@@ -141,10 +141,13 @@ def registry() -> list[dict]:
 
 @st.cache_data(ttl=300)
 def public_columns(tbl: str) -> list[tuple[str, str]]:
+    from central.manifest import is_private_column
     rows = _conn().execute(
         "SELECT column, label FROM _columns WHERE tbl=? AND is_public=1 ORDER BY ordinal", (tbl,)
     ).fetchall()
-    return [(r["column"], r["label"]) for r in rows]
+    # Demographic columns stay in the database. An older registry may still have
+    # them flagged public; they are not drawn on this page either way.
+    return [(r["column"], r["label"]) for r in rows if not is_private_column(r["column"])]
 
 
 @st.cache_data(ttl=300)
@@ -462,16 +465,17 @@ except Exception as ex:  # noqa: BLE001
     st.error(f"Couldn't load this dataset: {ex}")
     st.stop()
 
-# Per-person privacy: names and birth dates never appear per row (table, filters,
-# download). Birth years may still feed the aggregate charts; names never do.
+# Per-person privacy: names and birth dates never appear in the table, the
+# filters, the charts or the download. Websites stay.
 _name_cols, _dob_cols = person_identifying(c for c, _ in cols)
 _hidden_per_row = set(_name_cols) | set(_dob_cols)
-cats = [c for c in cats if c not in _name_cols]
+cats = [c for c in cats if c not in _hidden_per_row]
+nums = [c for c in nums if c not in _dob_cols]
 if _hidden_per_row:
     st.caption("🔒 " + ", ".join(labels.get(c, c) for c in sorted(_hidden_per_row))
                + (" are" if len(_hidden_per_row) > 1 else " is")
-               + " not shown per row. Birth years only appear aggregated in the charts; "
-                 "websites stay so you can reach a maker directly.")
+               + " not shown on this public page. "
+                 "Websites stay so you can reach a maker directly.")
 
 # --- filters ---------------------------------------------------------------
 with st.expander("Filters", expanded=False):

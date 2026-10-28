@@ -2,7 +2,7 @@
 
 On the site these are **Collecting Events** (the code and URLs still say seasons/games; see
 `docs/NAMING.md`). A collecting event is a themed, time-boxed call for artists ("Court of
-the Gourds: blown-glass pumpkins from every studio") that doubles as a collecting game.
+the Gourds 2026: blown-glass pumpkins from every studio") that doubles as a collecting game.
 Makers enter pieces they have already published through Glowtbook and registered for a
 Glass ID; collectors buy them from the shops, **check** them with Check a Piece and **add
 them to their collection**; signed-in visitors **vote**; it all rolls up into leaderboards
@@ -50,7 +50,7 @@ scan ─▶ authenticate ─▶ collect ─▶ vote ─▶ share ─▶ (someone
 
 | When | Season | Theme |
 |---|---|---|
-| October | **Court of the Gourds** | Blown-glass pumpkins from every studio |
+| October | **Court of the Gourds 2026** | Blown-glass pumpkins from every studio |
 | December | **Heirloom Ornaments** | The ones that go on the tree every year |
 | Spring | **Paperweights** | Murrine, millefiori, the lampworked garden |
 | Summer | **Drinkware** | Tumblers, stemware — the glass you actually use |

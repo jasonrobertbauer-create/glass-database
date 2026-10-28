@@ -51,23 +51,31 @@ DATASETS = [
      "Artists working in glass (demo data)",
      [("artist_name", "Artist Name", 1), ("based_in", "Based In", 1),
       ("primary_technique", "Primary Technique", 1),
-      ("birth_year", "Birth Year", 1), ("website", "Website", 1),
+      # Marked public on purpose: an older registry did this. The public API
+      # and explorer still withhold them (central.manifest.is_private_column).
+      ("birth_year", "Birth Year", 1), ("ethnicity", "Ethnicity", 1),
+      ("gender", "Gender", 1), ("website", "Website", 1),
       ("phone", "Phone", 0)],
      [
         dict(artist_name="Rae Sutter", based_in="Crozet, VA",
              primary_technique="Blown / cane", birth_year="1984",
+             ethnicity="White", gender="Woman",
              website="https://example.com/rae", phone="555-0100"),
         dict(artist_name="Ivo Marchetti", based_in="Venice, IT",
              primary_technique="Incalmo", birth_year="1971",
+             ethnicity="Hispanic or Latino", gender="Man",
              website="https://example.com/ivo", phone="555-0101"),
         dict(artist_name="Nadia Okonkwo", based_in="Portland, OR",
              primary_technique="Flameworking", birth_year="1990",
+             ethnicity="Black or African American", gender="Woman",
              website="https://example.com/nadia", phone="555-0102"),
         dict(artist_name="Bea Lindqvist", based_in="Bristol, UK",
              primary_technique="Kiln casting", birth_year="1965",
+             ethnicity="Asian", gender="Nonbinary",
              website="https://example.com/bea", phone="555-0103"),
         dict(artist_name="Theo Park", based_in="Norfolk, VA",
              primary_technique="Murrine", birth_year="1996",
+             ethnicity="Two or More Races / Multiracial", gender="Man",
              website="https://example.com/theo", phone="555-0104"),
      ]),
     ("studio_intake", "studios", "restricted",
@@ -121,7 +129,7 @@ def seed() -> str:
 
 # --- demo objects + a demo collecting event (a "season" in the code) --------------
 # Three published pieces (so the Directory shows "Check a Piece" and the collecting
-# event has something to enter), then "Court of the Gourds" (slug pumpkin-patch-2026)
+# event has something to enter), then "Court of the Gourds 2026" (slug pumpkin-patch-2026)
 # with two approved entries, a few votes and one piece checked into a collection.
 # Everything here is prefixed demo-/obj-demo- and deleted before it is re-inserted,
 # so re-running the seed is idempotent.
@@ -224,7 +232,7 @@ def _seed_objects_and_season(c) -> None:
 
     # --- the collecting event (slug unchanged so links and tests keep working) ----
     sid = seasons.create_season(
-        c, title="Court of the Gourds", slug="pumpkin-patch-2026",
+        c, title="Court of the Gourds 2026", slug="pumpkin-patch-2026",
         theme="Blown-glass pumpkins from every studio",
         description="October is pumpkin time in every hot shop we know. Enter yours, send "
                     "collectors to your shop, and let the crowd pick a favourite.",

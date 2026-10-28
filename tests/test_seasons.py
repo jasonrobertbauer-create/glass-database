@@ -94,6 +94,12 @@ def test_ensure_create_list_current(demo_db):
     assert S.current_season(c)["id"] == sid            # open beats voting; latest start wins
     S.set_status(c, sid, "voting")
     assert S.current_season(c)["slug"] == "pumpkin-patch-2026"   # the seeded open season
+    assert S.current_season(c)["title"] == "Court of the Gourds 2026"
+    c.execute("UPDATE seasons SET title=? WHERE slug=?", ("Court of Gourds 2026", "pumpkin-patch-2026"))
+    c.commit()
+    S.ensure(c)                                               # the saved title was missing "the"
+    assert S.get_season(c, "pumpkin-patch-2026")["title"] == "Court of the Gourds 2026"
+    assert S.get_season(c, "pumpkin-patch-2026")["slug"] == "pumpkin-patch-2026"
     with pytest.raises(ValueError):
         S.set_status(c, sid, "bogus")
     for x in (draft, sid, sid2):

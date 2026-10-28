@@ -22,13 +22,11 @@ items below. Everything is scoped to the single Ubuntu host.
 2. **Verify app ports aren't public:** `ss -ltnp` — the 850x/8000/8200 ports should
    show `127.0.0.1`, not `0.0.0.0`. If a Streamlit unit still binds all interfaces,
    add `--server.address=127.0.0.1` to its `ExecStart` and restart.
-3. **Apache security headers** — add to the vhost:
-   `Header always set X-Content-Type-Options nosniff`,
-   `Header always set X-Frame-Options SAMEORIGIN`,
-   `Header always set Referrer-Policy strict-origin-when-cross-origin`,
-   and a **Strict-Transport-Security** header (once you're sure HTTPS is solid).
-   Do NOT add a restrictive Content-Security-Policy that blocks the DINOv2 CDN
-   (jsdelivr / huggingface) the capture apps use.
+3. **Apache security headers** — already set in `apache-glassdatabase-proxy.conf`
+   (nosniff, SAMEORIGIN, Referrer-Policy, HSTS on HTTPS, and a Content-Security-Policy
+   that still allows the fingerprint camera's jsDelivr / Hugging Face libraries,
+   the map, fonts, and Streamlit). Keep that policy in step with
+   `central/security_headers.py`.
 4. **Backups** — the SQLite DB (`data/glassdb.db`), signing cert, AIP bags, and
    media. A nightly `sqlite3 .backup` + off-box copy. Test a restore.
 5. **Least-privilege service user** — services run as `glassdb`; confirm it isn't a

@@ -101,14 +101,11 @@ def auth_config() -> dict:
 
 
 def secrets_diagnostics() -> dict:
-    """Why sign-in is (not) configured, without exposing any secret values: which
-    file was found, whether it parsed and with what, whether [auth] exists, and
-    which provider tables are complete. Served by GET /api/auth/providers so an
-    admin can see the reason from a browser."""
-    import sys as _sys
-    d: dict = {"python": f"{_sys.version_info.major}.{_sys.version_info.minor}", "path": None,
-               "exists": False, "readable": False, "parser": None, "error": None, "has_auth": False,
-               "providers": [], "incomplete": {}}
+    """Why sign-in is (not) configured, without secret values. For server logs and
+    tests only — do not put this dict on a public response. ``path`` is the file
+    the process looked at; it is not safe to show to browsers."""
+    d: dict = {"path": None, "exists": False, "readable": False, "parser": None, "error": None,
+               "has_auth": False, "providers": [], "incomplete": {}}
     for p in secrets_candidates():
         d["path"] = str(p)
         if not p.exists():

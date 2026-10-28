@@ -107,10 +107,13 @@ def test_providers_configured_from_secrets_and_login_redirects(client, tmp_path,
     f.write_text(SECRETS, encoding="utf-8")
     monkeypatch.setenv("GLASSDB_SECRETS_PATH", str(f))
     monkeypatch.setenv("PUBLIC_BASE_URL", "https://glassdatabase.org")
-    j = client.get("/auth/providers").json()
+    r = client.get("/auth/providers")
+    j = r.json()
     assert j["configured"] is True and j["provider"] == "google" and j["note"] is None
     assert j["redirect_uri"] == "https://glassdatabase.org/auth/callback"
-    assert j["diagnostics"]["providers"] == ["google"] and j["diagnostics"]["parser"]
+    assert "diagnostics" not in j
+    # the response must not name the secrets file, its directory, or the Python version
+    assert str(f) not in r.text and "secrets.toml" not in r.text and "python" not in r.text.lower()
 
     import api.auth as A
     monkeypatch.setattr(A, "_metadata", lambda url: {
@@ -126,9 +129,15 @@ def test_providers_configured_from_secrets_and_login_redirects(client, tmp_path,
     assert A.STATE_COOKIE in r.cookies
 
 
-def test_unconfigured_login_explains_why(client, tmp_path, monkeypatch):
-    monkeypatch.setenv("GLASSDB_SECRETS_PATH", str(tmp_path / "nope.toml"))
+def test_unconfigured_login_does_not_leak_internals(client, tmp_path, monkeypatch):
+    missing = tmp_path / "nope.toml"
+    monkeypatch.setenv("GLASSDB_SECRETS_PATH", str(missing))
     r = client.get("/auth/login", follow_redirects=False)
-    assert r.status_code == 503 and "no secrets.toml found" in r.json()["detail"]
-    j = client.get("/auth/providers").json()
-    assert j["configured"] is False and "no secrets.toml found" in j["note"]
+    assert r.status_code == 503
+    detail = r.json()["detail"]
+    assert "Sign-in isn't configured" in detail
+    assert str(missing) not in detail and "secrets.toml" not in detail and "python" not in detail.lower()
+    pr = client.get("/auth/providers")
+    j = pr.json()
+    assert j["configured"] is False and j["note"] and "diagnostics" not in j
+    assert str(missing) not in pr.text and "secrets.toml" not in pr.text and "python" not in pr.text.lower()

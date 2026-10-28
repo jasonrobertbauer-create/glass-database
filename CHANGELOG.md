@@ -6,6 +6,16 @@ All notable changes are documented here. This project distinguishes
 proof-of-concept features from production-ready ones in its docs.
 
 ## [Unreleased]
+### Changed
+- **Public privacy and the collecting-event name** — ethnicity, gender and birth year
+  stay stored but are no longer returned by the public API or shown in the directory.
+  The sign-in status page no longer reports the server's secrets-file path or Python
+  version. The season's name is **Court of the Gourds 2026** (the live title was missing
+  "the"; that saved title is corrected, and the link stays the same). The Lima essay
+  scrolls its tables inside the page on a phone instead of widening the whole page.
+  Pages carry a link-preview title, description and image. The proxy sends the usual
+  security headers, including a content policy that still allows the fingerprint camera,
+  the map, fonts and sign-in.
 ### Added
 - **Seasons, first live game feedback** — a ranked **standings** list with thumbnails at the top
   of the entries (visible from the first entry), the homepage shows the season's pieces as

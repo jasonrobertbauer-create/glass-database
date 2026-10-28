@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import logging
 import os
 import secrets
 import sys
@@ -39,6 +40,14 @@ from central import sessions  # noqa: E402
 router = APIRouter(prefix="/auth", tags=["auth"])
 STATE_COOKIE = "gdb_oauth"
 _META_CACHE: dict[str, tuple[float, dict]] = {}
+log = logging.getLogger(__name__)
+
+# What a browser is allowed to see when sign-in isn't set up. The specific
+# reason (missing file, unreadable path, Python/parser details) stays in the log.
+PUBLIC_SIGNIN_NOTE = (
+    "Sign-in isn't configured on this server yet. You can still pair a phone from "
+    "Glowtbook → Objects → Fingerprint."
+)
 
 
 # --- resolving the caller ---------------------------------------------------
@@ -71,19 +80,19 @@ def provider() -> tuple[str, dict] | None:
 
 
 def why_not_configured() -> str:
-    """A specific, admin-readable reason sign-in is off (no secret values)."""
+    """A specific reason sign-in is off, for the server log only. No secret values,
+    but it does name the file the process looked at — never put this in a response."""
     d = sessions.secrets_diagnostics()
     if not d["exists"]:
-        return (f"no secrets.toml found (looked at {d['path']}); copy .streamlit/secrets.toml.example, "
-                "fill in [auth.google], and restart the API")
+        return "no secrets file found; copy .streamlit/secrets.toml.example and fill in [auth.google]"
     if d["error"]:
-        return f"secrets.toml at {d['path']} could not be read: {d['error']}"
+        return f"the secrets file could not be read: {d['error']}"
     if not d["has_auth"]:
-        return f"secrets.toml at {d['path']} has no [auth] block"
+        return "the secrets file has no [auth] block"
     if d["incomplete"] and not d["providers"]:
         parts = "; ".join(f"[auth.{k}] is missing {', '.join(v)}" for k, v in d["incomplete"].items())
-        return f"secrets.toml at {d['path']}: {parts}"
-    return f"secrets.toml at {d['path']} has [auth] but no provider table with client_id, client_secret and server_metadata_url"
+        return parts
+    return "the secrets file has [auth] but no provider with client_id, client_secret and server_metadata_url"
 
 
 def _public_base(request: Request) -> str:
@@ -140,14 +149,14 @@ def set_session_cookie(response: Response, request: Request, token: str,
 def providers(request: Request):
     p = provider()
     dev = os.environ.get("GLASSDB_DEV_LOGIN") == "1"
+    if not p and not dev:
+        log.warning("sign-in unavailable: %s", why_not_configured())
     return {"configured": bool(p) or dev, "provider": (p[0] if p else ("dev" if dev else None)),
             "login": f"{_api_prefix(request)}/auth/login",
             "redirect_uri": redirect_uri(request) if p else None,
             "pairing": "Open the capture app from Glowtbook → Objects → Fingerprint to pair a "
                        "device without signing in again.",
-            "note": None if p else ("Sign-in isn't configured on this server: " + why_not_configured()
-                                    + ". Register /api/auth/callback as a redirect URI too (deploy/AUTH.md)."),
-            "diagnostics": sessions.secrets_diagnostics()}
+            "note": None if (p or dev) else PUBLIC_SIGNIN_NOTE}
 
 
 @router.get("/login", summary="Start sign-in (authorization code + PKCE)")
@@ -157,9 +166,9 @@ def login(request: Request, next: str = "/"):  # noqa: A002
         if os.environ.get("GLASSDB_DEV_LOGIN") == "1":
             from urllib.parse import quote
             return RedirectResponse(f"{_api_prefix(request)}/auth/dev-login?next={quote(_safe_next(next), safe='')}")
+        log.warning("sign-in unavailable: %s", why_not_configured())
         raise HTTPException(503, "Sign-in isn't configured on this server. Pair from Glowtbook "
-                                 "(Objects → Fingerprint → Pair this phone) instead. Admin: "
-                                 + why_not_configured() + " — details at /api/auth/providers.")
+                                 "(Objects → Fingerprint → Pair this phone) instead.")
     name, cfg = p
     meta = _metadata(cfg["server_metadata_url"])
     verifier = secrets.token_urlsafe(48)

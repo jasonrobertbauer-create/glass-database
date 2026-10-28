@@ -207,9 +207,11 @@ CSS = """
   .opener .label { line-height: 1.8; }
   .opener .sign { margin-top: 1.2rem; }
   /* post body: prose in the 9/12 column under the title */
-  .body-grid { display: grid; grid-template-columns: 3fr 9fr; gap: 2rem; padding: clamp(2.5rem, 5vw, 4rem) 0; }
+  /* minmax(0, …) so a wide table scrolls inside the article instead of widening the page */
+  .body-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); gap: 2rem; padding: clamp(2.5rem, 5vw, 4rem) 0; min-width: 0; }
+  .body-grid > * { min-width: 0; }
   .body-grid aside { display: flex; flex-direction: column; gap: 1.1rem; align-items: flex-start; align-self: start; position: sticky; top: 90px; }
-  article.post { max-width: 68ch; font-size: 17px; line-height: 1.65; color: var(--ink-2); }
+  article.post { max-width: 68ch; min-width: 0; font-size: 17px; line-height: 1.65; color: var(--ink-2); overflow-wrap: break-word; }
   article.post p { max-width: none; margin: 0 0 1.2em; }
   article.post h2 { font-size: 2.2rem; line-height: 1.1; color: var(--ink); margin: 2.4em 0 .6em; font-variation-settings: "opsz" 72; }
   article.post h2:first-child { margin-top: 0; }
@@ -225,6 +227,7 @@ CSS = """
     font-family: var(--serif); font-weight: 350; font-size: 1.15em; line-height: 1.45; }
   article.post blockquote p { margin: 0; }
   article.post hr { border: 0; height: 1px; background: var(--rule); margin: 2.6em 0; }
+  article.post .tbl { max-width: 100%; overflow-x: auto; }
   article.post .tbl table { min-width: 520px; }
   .post-foot { max-width: 68ch; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--ink); }
   .post-foot .sign { margin-top: 1rem; }
@@ -236,7 +239,7 @@ CSS = """
   .posts.list li a.t { display: block; font: 350 1.5rem/1.15 var(--serif); letter-spacing: -.01em; text-decoration: none; margin-bottom: .4rem; }
   .posts.list li a.t:hover { color: var(--red); }
   .posts.list li p { color: var(--ink-2); font-size: 16px; margin: 0 0 .8rem; }
-  @media (max-width: 980px) { .body-grid { grid-template-columns: 1fr; } .body-grid aside { position: static; flex-direction: row; flex-wrap: wrap; } }
+  @media (max-width: 980px) { .body-grid { grid-template-columns: minmax(0, 1fr); } .body-grid aside { position: static; flex-direction: row; flex-wrap: wrap; } }
   @media (max-width: 680px) { .posts.list li { grid-template-columns: 1fr; gap: .3rem; } }
 """
 
@@ -302,7 +305,29 @@ def _subscribe(label: str = "Get new studies by email", uid: str = "em") -> str:
             '<p class="label" role="status" aria-live="polite" style="margin-top:.6rem"></p>')
 
 
-def _page(title: str, description: str, body: str, canonical: str, extra_head: str = "", index_on: bool = False) -> str:
+OG_IMAGE = "https://glassdatabase.org/barcoding/capture.jpg"
+
+
+def _social(title: str, description: str, url: str, image: str, og_type: str = "website") -> str:
+    """Open Graph + Twitter card. Crawlers do not run JavaScript, so this is in the HTML."""
+    t, d, u, i = (html.escape(x or "", quote=True) for x in (title, description, url, image))
+    return (
+        f'<meta property="og:site_name" content="{SITE_TITLE}">\n'
+        f'<meta property="og:type" content="{html.escape(og_type, quote=True)}">\n'
+        f'<meta property="og:title" content="{t}">\n'
+        f'<meta property="og:description" content="{d}">\n'
+        f'<meta property="og:url" content="{u}">\n'
+        f'<meta property="og:image" content="{i}">\n'
+        f'<meta name="twitter:card" content="summary_large_image">\n'
+        f'<meta name="twitter:title" content="{t}">\n'
+        f'<meta name="twitter:description" content="{d}">\n'
+        f'<meta name="twitter:image" content="{i}">'
+    )
+
+
+def _page(title: str, description: str, body: str, canonical: str, extra_head: str = "",
+          index_on: bool = False, image: str = OG_IMAGE, og_type: str = "website") -> str:
+    social = _social(title, description, canonical, image or OG_IMAGE, og_type)
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -310,6 +335,7 @@ def _page(title: str, description: str, body: str, canonical: str, extra_head: s
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{html.escape(title)}</title>
 <meta name="description" content="{html.escape(description, quote=True)}">
+{social}
 <link rel="canonical" href="{html.escape(canonical, quote=True)}">
 <link rel="alternate" type="application/rss+xml" title="{SITE_TITLE} — {BLOG_TITLE}" href="/blog/feed.xml">
 {FONTS}
@@ -382,7 +408,11 @@ def render_post(p: dict, prev: dict | None, nxt: dict | None, base: str) -> str:
           "datePublished": p["date"], "author": {"@type": "Organization", "name": p["author"] or SITE_TITLE},
           "description": p["summary"], "url": base + post_url(p), "license": "https://creativecommons.org/licenses/by/4.0/"}
     extra = f'\n<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
-    return _page(f"{p['title']} — {SITE_TITLE}", p["summary"] or p["title"], body, base + post_url(p), extra)
+    image = p.get("image") or ""
+    if image.startswith("/"):
+        image = base + image
+    return _page(f"{p['title']} — {SITE_TITLE}", p["summary"] or p["title"], body,
+                 base + post_url(p), extra, image=image or OG_IMAGE, og_type="article")
 
 
 def render_index(posts: list[dict], base: str) -> str:

@@ -71,6 +71,8 @@ def test_build_pages_feed_listing_and_homepage(tmp_path):
     assert 'class="tbl"' in page and "Theoretical studies" in page and "min read" in page
     assert 'href="/blog/older.html"' in page                        # older/newer navigation
     assert 'application/ld+json' in page and '"headline": "A Test Study"' in page
+    assert 'property="og:image"' in page and 'name="twitter:card"' in page
+    assert "minmax(0, 1fr)" in page                         # wide tables scroll instead of widening the page
     idx = (out / "index.html").read_text(encoding="utf-8")
     assert idx.index("a-test-study") < idx.index("older.html")      # newest first
     assert "Draft" not in idx and not (out / "draft.html").exists()
