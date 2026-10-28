@@ -1,0 +1,28 @@
+# Click-through test of this fork. One free web service, invented demo data.
+# Deploy link (this branch only):
+# https://render.com/deploy?repo=https://github.com/jasonrobertbauer-create/glass-database/tree/cursor/render-test-4acf
+#
+# Not for the upstream project and not for real people's data.
+services:
+  - type: web
+    name: glass-database-test
+    runtime: python
+    plan: free
+    branch: cursor/render-test-4acf
+    autoDeployTrigger: off
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: python -m scripts.render_start
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.11"
+      - key: GLASSDB_PROXY_APPS
+        value: "1"
+      - key: ROOT_PATH
+        value: "/api"
+      - key: GLASSDB_MODERATION
+        value: "1"
+      # Filled in by Render. Keeps a session cookie stable across a restart.
+      # Sign-in itself stays off until Google keys are added (see deploy/RENDER.md).
+      - key: GLASSDB_SESSION_SECRET
+        generateValue: true
